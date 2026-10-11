@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Hero from "@/components/Hero";
 
 export default function Home() {
   return (
@@ -95,8 +96,10 @@ export default function Home() {
       </header>
       <main className="relative z-10 flex-grow">
         {/* Aquí se integrarán las secciones de los equipos:
-            Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
+            Hero, Lenguajes, Categorías, Comparador, Filosofía.
+             */}
         {/* SECTION: CTA Final */}
+         <Hero />
         <section className="py-20 md:py-28 relative overflow-hidden">
           {/* Ambient Glow Spot */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/15 rounded-full blur-[100px] pointer-events-none"></div>
