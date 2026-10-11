@@ -1,4 +1,140 @@
-import Image from "next/image";
+import React from "react";
+
+// Estructura de tipos para las tarjetas de lenguajes
+interface LanguageItem {
+  code: string;
+  codeColorClass: string;
+  codeBorderClass: string;
+  name: string;
+  category: string;
+  description: string;
+  tags: string[];
+  version: string;
+}
+
+// Datos extraídos del HTML para JavaScript y Python
+const featuredLanguagesData: LanguageItem[] = [
+  {
+    code: "JS",
+    codeColorClass: "text-amber-300",
+    codeBorderClass: "border-amber-400/30",
+    name: "JavaScript",
+    category: "Frontend & Backend",
+    description:
+      "El motor universal de la web y Node.js. Dinámico, asíncrono con Event Loop y el repositorio de paquetes más extenso del mundo (npm).",
+    tags: ["Web interactiva", "APIs REST", "Full-Stack"],
+    version: "vES2024 / Node 22",
+  },
+  {
+    code: "PY",
+    codeColorClass: "text-sky-400",
+    codeBorderClass: "border-sky-400/30",
+    name: "Python",
+    category: "AI, Data & Backend",
+    description:
+      "Sintaxis clara y expresiva. Estándar indiscutible para Machine Learning, procesamiento científico y prototipado ágil con FastAPI y Django.",
+    tags: ["Inteligencia Artificial", "APIs REST", "Data Science"],
+    version: "v3.12.3 / PyTorch",
+  },
+];
+
+// Componente reutilizable para la sección de lenguajes
+export const FeaturedLanguagesSection: React.FC = () => {
+  return (
+    <section
+      className="py-16 md:py-24 border-b border-outline-variant/20"
+      id="lenguajes"
+    >
+      <div className="max-w-[1440px] mx-auto px-margin">
+        {/* Cabecera de la sección */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-space-md">
+          <div>
+            <div className="flex items-center gap-2 text-primary text-label-code font-label-code mb-2">
+              <span className="material-symbols-outlined text-[16px]">
+                code
+              </span>
+              <span>CATÁLOGO PRINCIPAL</span>
+            </div>
+            <h2 className="text-headline-lg font-headline-lg text-on-surface">
+              Lenguajes Destacados
+            </h2>
+            <p className="text-on-surface-variant text-body-md font-body-md max-w-2xl mt-1">
+              Explora las tecnologías que impulsan la industria moderna, con
+              perfiles detallados, arquitectura de runtime y aplicabilidad.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded bg-surface-container border border-outline-variant/30 text-label-code font-label-code text-on-surface-variant flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-tertiary"></span>2
+              seleccionados de 45+
+            </span>
+          </div>
+        </div>
+
+        {/* Cuadrícula de tarjetas de lenguajes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-gutter">
+          {featuredLanguagesData.map((lang) => (
+            <div
+              key={lang.name}
+              className="bg-surface-container-low border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between hover:border-primary/50 transition-all duration-200 group"
+            >
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-label-code font-bold ${lang.codeColorClass} border ${lang.codeBorderClass}`}
+                    >
+                      {lang.code}
+                    </div>
+                    <div>
+                      <h3 className="text-headline-sm font-headline-sm text-on-surface">
+                        {lang.name}
+                      </h3>
+                      <span className="text-label-code font-label-code text-outline text-[11px]">
+                        {lang.category}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Badge de compatibilidad */}
+                  <span className="bg-tertiary-container/30 border border-tertiary/40 text-tertiary px-2 py-0.5 rounded text-[10px] font-label-code">
+                    Preparado para API REST
+                  </span>
+                </div>
+                <p className="text-body-sm font-body-sm text-on-surface-variant mb-4">
+                  {lang.description}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mb-6">
+                  {lang.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 rounded bg-surface-container text-on-surface text-[11px] font-label-ui border border-outline-variant/30"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+                <span className="text-label-code font-label-code text-outline">
+                  {lang.version}
+                </span>
+                <button
+                  className="text-label-ui font-label-ui text-primary group-hover:text-primary-fixed flex items-center gap-1 font-medium transition-colors"
+                  type="button"
+                >
+                  <span>Ver detalles</span>
+                  <span className="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">
+                    arrow_forward
+                  </span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default function Home() {
   return (
@@ -93,9 +229,11 @@ export default function Home() {
           </div>
         </div>
       </header>
+
       <main className="relative z-10 flex-grow">
-        {/* Aquí se integrarán las secciones de los equipos:
-            Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
+        {/* SECCIÓN MIGRADA: Lenguajes Destacados (JS y Python) */}
+        <FeaturedLanguagesSection />
+
         {/* SECTION: CTA Final */}
         <section className="py-20 md:py-28 relative overflow-hidden">
           {/* Ambient Glow Spot */}
@@ -148,6 +286,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+
       <footer className="full-width bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/20 dark:border-outline-variant/20 flat no shadows">
         <div className="w-full max-w-[1440px] mx-auto px-margin py-space-xl flex flex-col md:flex-row justify-between items-center gap-space-md">
           {/* Brand & Copyright */}
