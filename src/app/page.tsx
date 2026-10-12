@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Categorias from "./Categorias";
 
 export default function Home() {
   return (
@@ -147,6 +148,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Categorias />
       </main>
       <footer className="full-width bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/20 dark:border-outline-variant/20 flat no shadows">
         <div className="w-full max-w-[1440px] mx-auto px-margin py-space-xl flex flex-col md:flex-row justify-between items-center gap-space-md">
