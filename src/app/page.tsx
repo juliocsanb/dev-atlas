@@ -1,4 +1,8 @@
-import Image from "next/image";
+import HeroSection from "@/components/HeroSection";
+import FeaturedLanguages from "@/components/FeaturedLanguages";
+import CategoriesSection from "@/components/CategoriesSection";
+import LanguageComparison from "@/components/LanguageComparison";
+import PhilosophySection from "@/components/PhilosophySection";
 
 export default function Home() {
   return (
@@ -13,7 +17,6 @@ export default function Home() {
       />
       <header className="docked full-width top-0 sticky z-50 bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-outline-variant/30 shadow-sm dark:shadow-none">
         <div className="w-full max-w-[1440px] mx-auto px-margin flex items-center justify-between h-16">
-          {/* Logo + Brand Anchor */}
           <div className="flex items-center gap-space-lg">
             <a className="flex items-center gap-space-sm group" href="#">
               <img
@@ -22,7 +25,6 @@ export default function Home() {
                 src="https://lh3.googleusercontent.com/aida/AEtjO1W1Tw-x1O40sqPh9vuv_QWbM4Ammun6q4_B3PD_mnhfxrWJg6YdH1-oKm6wnXSqbDi7tZ1D6lSjjw8UlJTdhqGwvNUZtnmv9aiTM_v6Fa_mC2izX4NAhHJI3YrrQp412k6fIs-YeqLFspefXGiH5fNv3gHerDZxV1Rue29-6yUfPNMfrdo9bRmskFaOUIjyB5Ae4ex_FRORdO2gMtjYj7l2Sr0LtXLGoYVAQK2h0GTi"
               />
             </a>
-            {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-space-lg">
               <a
                 className="text-primary dark:text-primary font-medium border-b-2 border-primary dark:border-primary pb-1 text-label-ui font-label-ui transition-colors"
@@ -56,9 +58,7 @@ export default function Home() {
               </a>
             </nav>
           </div>
-          {/* Right cluster: Fast Search & Trailing Actions */}
           <div className="flex items-center gap-space-md">
-            {/* Search Bar with Kbd */}
             <div className="hidden sm:flex items-center bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-3 py-1.5 gap-2 text-on-surface-variant focus-within:border-primary transition-colors cursor-pointer group">
               <span className="material-symbols-outlined text-[18px] text-outline">
                 search
@@ -70,7 +70,6 @@ export default function Home() {
                 Ctrl+K
               </kbd>
             </div>
-            {/* Trailing Terminal Icon Action */}
             <button
               aria-label="Terminal interactivo"
               className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50 rounded-lg transition-colors duration-150"
@@ -80,7 +79,6 @@ export default function Home() {
                 terminal
               </span>
             </button>
-            {/* Trailing Primary Action (Login button) */}
             <a
               className="bg-surface-container border border-outline-variant/50 hover:border-primary/50 text-on-surface hover:text-primary px-3.5 py-1.5 rounded-lg text-label-ui font-label-ui transition-all duration-150 ease-out active:scale-[0.98] flex items-center gap-1.5"
               href="/login"
@@ -94,15 +92,15 @@ export default function Home() {
         </div>
       </header>
       <main className="relative z-10 flex-grow">
-        {/* Aquí se integrarán las secciones de los equipos:
-            Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
-        {/* SECTION: CTA Final */}
+        <HeroSection />
+        <FeaturedLanguages />
+        <CategoriesSection />
+        <LanguageComparison />
+        <PhilosophySection />
         <section className="py-20 md:py-28 relative overflow-hidden">
-          {/* Ambient Glow Spot */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/15 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/15 rounded-full blur-[100px] pointer-events-none" />
           <div className="max-w-[1440px] mx-auto px-margin relative z-10 text-center">
             <div className="max-w-2xl mx-auto flex flex-col items-center">
-              {/* Architectural badges */}
               <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
                 <span className="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/40 text-label-code font-label-code text-primary flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[14px]">
@@ -150,7 +148,6 @@ export default function Home() {
       </main>
       <footer className="full-width bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/20 dark:border-outline-variant/20 flat no shadows">
         <div className="w-full max-w-[1440px] mx-auto px-margin py-space-xl flex flex-col md:flex-row justify-between items-center gap-space-md">
-          {/* Brand & Copyright */}
           <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
             <a className="flex items-center gap-2" href="#">
               <img
@@ -163,7 +160,6 @@ export default function Home() {
               © 2025 DevAtlas. Built for deterministic developer ergonomics.
             </span>
           </div>
-          {/* Links Cluster */}
           <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6">
             <a
               className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors text-label-code font-label-code"
