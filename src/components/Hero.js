@@ -8,9 +8,9 @@ export default function Hero() {
               <span className="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
               <span>DevAtlas v2.5 • Compilador de decisiones técnicas</span>
             </div>
-            <h1 class="text-headline-xl md:text-display-hero font-display-hero tracking-tight text-on-surface">
+            <h1 className="text-headline-xl md:text-display-hero font-display-hero tracking-tight text-on-surface">
               Explora el mundo de la <br />
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                 programación
               </span>
             </h1>
