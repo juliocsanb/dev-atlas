@@ -1,5 +1,5 @@
 import Image from "next/image";
-
+import Categorias from "@/components/Categorias";
 export default function Home() {
   return (
     <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body-md text-body-md">
@@ -94,10 +94,11 @@ export default function Home() {
         </div>
       </header>
       <main className="relative z-10 flex-grow">
-        {/* Aquí se integrarán las secciones de los equipos:
-            Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
-        {/* SECTION: CTA Final */}
-        <section className="py-20 md:py-28 relative overflow-hidden">
+  {/* Aquí se integrarán las secciones de los equipos:
+      Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
+  <Categorias />
+  {/* SECTION: CTA Final */}
+  <section className="py-20 md:py-28 relative overflow-hidden">
           {/* Ambient Glow Spot */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/15 rounded-full blur-[100px] pointer-events-none"></div>
           <div className="max-w-[1440px] mx-auto px-margin relative z-10 text-center">
