@@ -80,12 +80,14 @@ export default function AuthLayout({
               {children}
               <div className="mt-6 pt-5 border-t border-outline-variant/20 text-center">
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  ¿No tienes una cuenta aún?
+                  {mode === "login"
+                    ? "¿No tienes una cuenta aún?"
+                    : "¿Ya tienes una cuenta?"}
                   <Link
                     className="font-semibold text-primary hover:text-primary-fixed underline-offset-4 hover:underline transition-colors ml-1"
-                    href="/registro"
+                    href={mode === "login" ? "/signup" : "/login"}
                   >
-                    Registrarse
+                    {mode === "login" ? "Regístrate" : "Inicia sesión"}
                   </Link>
                 </p>
               </div>

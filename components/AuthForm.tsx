@@ -10,22 +10,44 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
   const inputClass =
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
+
+  function sendForm(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (esRegistro && password !== confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      console.log("error");
+      return;
+    }
+
+    console.log({
+      modo: mode,
+      name: esRegistro ? name : undefined,
+      email: email,
+      password: password,
+    });
+  }
+
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={sendForm}>
       {esRegistro && (
         <div className="space-y-1.5">
           <label htmlFor="nombre" className={labelClass}>
             Nombre completo
           </label>
           <div className="relative">
-            <span
-              className="material-symbols-outlined absolute 
-                left-3 top-1/2 -translate-y-1/2 text-outline"
-            >
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">
               person
             </span>
             <input
@@ -36,6 +58,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               required
               placeholder="Tu nombre completo"
               className={inputClass}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
         </div>
@@ -55,6 +79,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             placeholder="alex.dev@empresa.io"
             required
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
       </div>
@@ -78,14 +104,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <span className="material-symbols-outlined">lock</span>
           </div>
           <input
-            className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             id="password"
             name="password"
             placeholder="••••••••••••"
             required
             type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <button
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant focus:outline-none transition-colors"
@@ -103,7 +129,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <div className="flex items-center justify-between">
             <label
               className="block font-label-ui text-label-ui text-on-surface-variant font-medium"
-              htmlFor="password"
+              htmlFor="confirmPassword"
             >
               Confirmar contraseña
             </label>
@@ -113,14 +139,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <span className="material-symbols-outlined">lock</span>
             </div>
             <input
-              className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              id="password"
-              name="password"
+              className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
             <button
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant focus:outline-none transition-colors"
@@ -152,12 +178,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <span className="font-label-code text-label-code text-outline hidden sm:inline-block"></span>
         </div>
       )}
-      <div className="pt-2">
+      <div className="pt-2 space-y-2">
+        {error && <p className="text-error text-sm font-medium">{error}</p>}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-not-allowed text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          disabled
-          title="La autenticación se integrará después"
         >
           <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
           <span className="material-symbols-outlined">
