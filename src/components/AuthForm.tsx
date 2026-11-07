@@ -1,7 +1,8 @@
 "use client";
-
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState } from "react";
+import { firebaseAuth } from "@/lib/firebaseConfig";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -9,13 +10,55 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const esRegistro = mode === "signup";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
   const inputClass =
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
+
+  async function sendForm(event: React.FormEvent<HTMLFormElement>) {
+    setError("");
+    event.preventDefault();
+    if (esRegistro && password !== confirmPassword) {
+      setError("Las contaseñas no coinciden");
+      return;
+    }
+
+    try {
+      if (esRegistro) {
+        const resultado = await createUserWithEmailAndPassword(
+          firebaseAuth,
+          email.trim(),
+          password,
+        );
+        await updateProfile(resultado.user, {
+          displayName: name.trim(),
+        });
+      }
+    } catch (error) {
+      console.log("Error de Firebase Auth: ", error);
+      setError(
+        esRegistro
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo electronico."
+          : "No se pudo iniciar sesion. Revise tus credenciales.",
+      );
+    }
+
+    console.log({
+      modo: mode,
+      name: esRegistro ? name : undefined,
+      email: email,
+      password: password,
+    });
+  }
+
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={sendForm}>
       {esRegistro && (
         <div className="space-y-1.5">
           <label htmlFor="nombre" className={labelClass}>
@@ -36,6 +79,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               required
               placeholder="Tu nombre completo"
               className={inputClass}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
         </div>
@@ -55,6 +100,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             placeholder="alex.dev@empresa.io"
             required
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
       </div>
@@ -86,6 +133,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             placeholder="••••••••••••"
             required
             type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <button
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant focus:outline-none transition-colors"
@@ -121,6 +170,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
             <button
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant focus:outline-none transition-colors"
@@ -153,10 +204,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </div>
       )}
       <div className="pt-2">
+        {error && (
+          <p role="alert" className="text-error text-sm">
+            {" "}
+            (error)
+          </p>
+        )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-not-allowed text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          disabled
           title="La autenticación se integrará después"
         >
           <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
