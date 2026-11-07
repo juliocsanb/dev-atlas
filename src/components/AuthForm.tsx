@@ -1,8 +1,12 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -25,7 +29,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setError("");
     event.preventDefault();
     if (esRegistro && password !== confirmPassword) {
-      setError("Las contaseñas no coinciden");
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -39,6 +43,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
@@ -207,7 +214,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         {error && (
           <p role="alert" className="text-error text-sm">
             {" "}
-            (error)
+            {error}
           </p>
         )}
         <button
