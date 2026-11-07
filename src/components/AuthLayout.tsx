@@ -87,7 +87,7 @@ export default function AuthLayout({
                     className="font-semibold text-primary hover:text-primary-fixed underline-offset-4 hover:underline transition-colors ml-1"
                     href={mode === "login" ? "/signup" : "/login"}
                   >
-                    {mode === "login" ? "Registrarse" : "Iniciar sesión"}
+                    {mode === "login" ? "Registrarse" : "iniciar sesion"}
                   </Link>
                 </p>
               </div>

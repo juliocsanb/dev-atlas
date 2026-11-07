@@ -1,9 +1,12 @@
 "use client";
-
 import Link from "next/link";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -40,13 +43,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
       setError(
         esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo electronico."
+          : "No se pudo iniciar sesion. Revise tus credenciales.",
       );
     }
 
@@ -207,6 +213,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       <div className="pt-2">
         {error && (
           <p role="alert" className="text-error text-sm">
+            {" "}
             {error}
           </p>
         )}
