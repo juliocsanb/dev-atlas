@@ -4,6 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { FirebaseError } from "firebase/app";
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
+import router from "next/router";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -16,20 +25,45 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [remember, setRemember] = useState(true);
+  const [recordarSesion, setRecordarSesion] = useState(true);
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
   const inputClass =
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
+  function getErrorMessage(code: string, esRegistro: boolean) {
+    switch (code) {
+      case "auth/invalid-credential":
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+        return "Correo o contraseña incorrectos.";
+      case "auth/too-many-requests":
+        return "Demasiados intentos. Inténtalo más tarde.";
+      case "auth/email-already-in-use":
+        return "Ese correo ya está registrado.";
+      case "auth/weak-password":
+        return "La contraseña debe tener al menos 6 caracteres.";
+      case "auth/invalid-email":
+        return "El correo no es válido.";
+      default:
+        return esRegistro
+          ? "No se pudo crear la cuenta. Revisa los datos."
+          : "No se pudo iniciar sesión. Inténtalo de nuevo.";
+    }
+  }
+
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
+    setStatus("loading");
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
@@ -40,22 +74,24 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        console.log("1. antes de setPersistence");
+        await setPersistence(
+          firebaseAuth,
+          recordarSesion ? browserLocalPersistence : browserSessionPersistence,
+        );
+        console.log("2. persistencia lista, iniciando sesión...");
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        console.log("3. sesión iniciada");
       }
-    } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
-      setError(
-        esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
-      );
+      setStatus("success"); // ← esto faltaba
+      setTimeout(() => setStatus("idle"), 2500);
+    } catch (err) {
+      const code = err instanceof FirebaseError ? err.code : "";
+      console.log("Error de Firebase Auth:", code);
+      setError(getErrorMessage(code, esRegistro));
+      setStatus("idle");
     }
-
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
   }
 
   return (
@@ -196,6 +232,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               id="remember"
               name="remember"
               type="checkbox"
+              checked={recordarSesion}
+              onChange={(e) => setRecordarSesion(e.target.checked)}
             />
             <span className="font-label-ui text-label-ui text-on-surface-variant hover:text-on-surface transition-colors">
               Mantener sesión activa
@@ -211,14 +249,40 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </p>
         )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          title="La autenticación se integrará después"
+          disabled={status !== "idle"}
+          className={`w-full flex items-center justify-center gap-2 text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors duration-300 active:scale-[0.98] border border-white/10 disabled:cursor-not-allowed ${
+            status === "success"
+              ? "bg-tertiary animate-success-pop"
+              : "bg-primary-container"
+          } ${status === "loading" ? "opacity-80" : ""}`}
         >
-          <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
-          <span className="material-symbols-outlined">
-            {esRegistro ? "person_add" : "arrow_forward"}
-          </span>
+          {status === "loading" && (
+            <>
+              <span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" />
+              <span>{esRegistro ? "Creando cuenta..." : "Verificando..."}</span>
+            </>
+          )}
+
+          {status === "success" && (
+            <>
+              <span className="material-symbols-outlined animate-check">
+                check_circle
+              </span>
+              <span>
+                {esRegistro ? "¡Cuenta creada!" : "¡Sesión iniciada!"}
+              </span>
+            </>
+          )}
+
+          {status === "idle" && (
+            <>
+              <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
+              <span className="material-symbols-outlined">
+                {esRegistro ? "person_add" : "arrow_forward"}
+              </span>
+            </>
+          )}
         </button>
       </div>
     </form>
