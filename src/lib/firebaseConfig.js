@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
@@ -11,5 +11,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 export const firebaseAuth = getAuth(app);
+
+// Analytics solo funciona en el navegador. En el servidor (cuando Next.js
+// genera las páginas) no existe `window`, así que lo saltamos para evitar errores.
+if (typeof window !== "undefined") {
+  isSupported().then((supported) => {
+    if (supported) getAnalytics(app);
+  });
+}
