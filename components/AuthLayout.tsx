@@ -97,7 +97,7 @@ export default function AuthLayout({
                 shield
               </span>
               <span className="font-label-code text-label-code text-outline tracking-tight text-center">
-                Autenticación en desarrollo · Próximamente disponible
+                Autenticación segura con Firebase
               </span>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function AuthLayout({
       <footer className="w-full bg-surface-container-lowest border-t border-outline-variant/20 py-6">
         <div className="w-full max-w-[1440px] mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            © 2026 DevAtlas. Todos los derechos reservados. reservados.
+            © 2026 DevAtlas. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-4 font-label-code text-label-code text-on-surface-variant">
             <Link
