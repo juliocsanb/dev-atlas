@@ -6,7 +6,7 @@ export default function SignUpPage() {
     <AuthLayout
       mode="signup"
       title="Crear cuenta"
-      description="Regístrate para comenzar a explorar DevAtlas."
+      description="Regístrate para comenzar a explirar DevAtlas."
     >
       <AuthForm mode="signup" />
     </AuthLayout>

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
+import { firebaseAuth } from "@/lib/firebaseConfig";
 
 type AuthFormProps = { mode: "login" | "signup" };
 export default function AuthForm({ mode }: AuthFormProps) {
@@ -14,6 +14,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [mostrarCuadroBienvenida, setMostrarCuadroBienvenida] = useState(false);
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
@@ -27,24 +28,25 @@ export default function AuthForm({ mode }: AuthFormProps) {
       setError("Las contraseñas no coinciden");
       return;
     }
-
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
-          auth,
+          firebaseAuth,
           emial.trim(),
           password,
         );
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+
+        setMostrarCuadroBienvenida(true);
       }
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
       setError(
         esRegistro
           ? "No se pudo crear la cuenta. Revisa los datos o el correo electrónico"
-          : "No se pudo iniciar sesión. Revsa tus credenciales. ",
+          : "No se pudo iniciar sesión. Revsa tus credenciales.",
       );
     }
 
@@ -219,6 +221,33 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </span>
         </button>
       </div>
+
+      {mostrarCuadroBienvenida && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+          <div className="bg-[#121824] border border-gray-800 p-8 rounded-xl max-w-md text-center shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-3">
+              ¡BIENVENIDO !!!
+            </h3>
+            <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+              Gracias por registrarte en{" "}
+              <span className="font-semibold text-white">DevAtlas</span>, por
+              favor <strong>inicia sesión</strong> con tu correo y contraseña
+              para seguir navegando.
+            </p>
+            <div className="mt-6 pt-5 border-t border-outline-variant/20 text-center">
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                <Link
+                  className="font-semibold text-primary hover:text-primary-fixed underline-offset-4 hover:underline transition-colors ml-1"
+                  href={"/login"}
+                  onClick={() => setMostrarCuadroBienvenida(false)}
+                >
+                  Iniciar sesión
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
