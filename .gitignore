@@ -20,6 +20,9 @@
 # production
 /build
 
+# local accounts and sessions
+/.dev-atlas-auth/
+
 # misc
 .DS_Store
 *.pem
