@@ -99,8 +99,6 @@ export default function Home() {
         </div>
       </header>
       <main className="relative z-10 flex-grow">
-        {/* Aquí se integrarán las secciones de los equipos:
-            Hero, Lenguajes, Categorías, Comparador, Filosofía. */}
         <Hero />
         <LenguajesDestacados />
         <Categorias />

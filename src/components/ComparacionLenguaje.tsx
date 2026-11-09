@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const ComparacionLenguaje: React.FC = () => {
   return (
@@ -107,8 +107,7 @@ export const ComparacionLenguaje: React.FC = () => {
                     ✓
                   </span>
                   <span>
-                    Concurrencia de primera clase mediante canales y
-                    goroutines.
+                    Concurrencia de primera clase mediante canales y goroutines.
                   </span>
                 </div>
               </div>
@@ -156,8 +155,7 @@ export const ComparacionLenguaje: React.FC = () => {
                     ✗
                   </span>
                   <span>
-                    Poco adecuado para prototipado rápido de scripting
-                    dinámico.
+                    Poco adecuado para prototipado rápido de scripting dinámico.
                   </span>
                 </div>
               </div>

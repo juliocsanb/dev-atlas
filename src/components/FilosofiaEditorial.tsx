@@ -17,16 +17,16 @@ export default function FilosofiaEditorial() {
                 <span>MANIFIESTO DEVATLAS</span>
               </div>
               <blockquote className="text-headline-lg md:text-headline-xl font-headline-xl text-on-surface mb-6 leading-tight">
-                «No existe el &quot;mejor&quot; lenguaje de programación, sino la
-                herramienta adecuada para cada problema.»
+                «No existe el &quot;mejor&quot; lenguaje de programación, sino
+                la herramienta adecuada para cada problema.»
               </blockquote>
               <p className="text-body-md font-body-md text-on-surface-variant leading-relaxed mb-6">
                 En ingeniería de software profesional, las decisiones
                 tecnológicas nunca se basan en dogmas ni fanatismos de
-                comunidad. Cada elección es un intercambio deliberado:
-                velocidad de compilación frente a tiempo de ejecución, tipado
-                estricto frente a velocidad de iteración, y control manual de
-                memoria frente a comodidad con recolector de basura.
+                comunidad. Cada elección es un intercambio deliberado: velocidad
+                de compilación frente a tiempo de ejecución, tipado estricto
+                frente a velocidad de iteración, y control manual de memoria
+                frente a comodidad con recolector de basura.
               </p>
             </div>
             {/* Pilares del trade-off */}
@@ -74,8 +74,7 @@ export default function FilosofiaEditorial() {
                   <strong className="text-on-surface block mb-1">
                     ¿Concurrencia masiva con miles de conexiones?
                   </strong>
-                  Prefiere Go o Elixir sobre runtimes monolíticos
-                  bloqueantes.
+                  Prefiere Go o Elixir sobre runtimes monolíticos bloqueantes.
                 </li>
                 <li className="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
                   <strong className="text-on-surface block mb-1">
@@ -86,8 +85,7 @@ export default function FilosofiaEditorial() {
                 </li>
                 <li className="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
                   <strong className="text-on-surface block mb-1">
-                    ¿Sistemas críticos de misión sin margen de fallo de
-                    memoria?
+                    ¿Sistemas críticos de misión sin margen de fallo de memoria?
                   </strong>
                   Rust proporciona seguridad matemática en tiempo de
                   compilación.
