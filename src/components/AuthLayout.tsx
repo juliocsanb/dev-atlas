@@ -80,14 +80,13 @@ export default function AuthLayout({
               {children}
               <div className="mt-6 pt-5 border-t border-outline-variant/20 text-center">
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  {mode === "login"
-                    ? "¿No tienes una cuenta aún?"
-                    : "¿Ya tienes cuenta?"}
+                  {mode === 'login'  ? "¿No tienes una cuenta aún?" :"¿Ya tienes cuenta? "}
                   <Link
                     className="font-semibold text-primary hover:text-primary-fixed underline-offset-4 hover:underline transition-colors ml-1"
-                    href={mode === "login" ? "/signup" : "/login"}
+                    href={mode === "login" ? "/singup" : "/login"}
                   >
-                    {mode === "login" ? "Registrarse" : "Iniciar sesión"}
+                    {mode === "login" ?
+                    "Registrarse" :"iniciar sesion"}
                   </Link>
                 </p>
               </div>
@@ -141,6 +140,5 @@ export default function AuthLayout({
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div> );
 }

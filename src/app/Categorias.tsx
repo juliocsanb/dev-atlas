@@ -177,6 +177,7 @@ export default function Categorias() {
           </div>
         </section>
       }
-    </section>
+
+      </section>
   );
 }

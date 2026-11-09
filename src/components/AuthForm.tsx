@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {auth} from"@/lib/firebaseConfig";
+import {createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword} from "firebase/auth";
+
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -11,54 +12,45 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const esRegistro = mode === "signup";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-
+  const[name, setName] = useState("");
+  const [email, setEmail]=useState("");
+  const [password, setPassword]= useState("");
+  const [confirmPassword, setConfirmPassword]= useState("");
+  const [error, setError]=useState("");
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
   const inputClass =
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
-
-  async function sendForm(event: React.FormEvent<HTMLFormElement>) {
+  async function sendForm (event: React.FormEvent<HTMLFormElement>){
     setError("");
     event.preventDefault();
-    if (esRegistro && password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+    if(esRegistro && password !== confirmPassword){
+      setError("Las contaseñas no coinciden"); 
       return;
-    }
-
-    try {
-      if (esRegistro) {
-        const resultado = await createUserWithEmailAndPassword(
-          firebaseAuth,
-          email.trim(),
-          password,
-        );
-        await updateProfile(resultado.user, {
-          displayName: name.trim(),
-        });
+   }
+   try{
+if(esRegistro){
+  const resultado = await createUserWithEmailAndPassword(
+    auth, 
+    email.trim(), 
+    password);
+    await updateProfile(resultado.user, {displayName: name.trim()}); 
+     } else {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+        window.location.href = "/dashboard";
       }
-    } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
-      setError(
-        esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
-      );
-    }
-
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
-  }
-
-  return (
+   }catch (error){
+    console.log("Error al enviar el formulario", error);
+    setError(esRegistro ? "Error al crear la cuenta" : "Error al iniciar sesión");
+   }
+   console.log({modo: mode,
+    name: esRegistro ? name : undefined,
+    email: email,
+    password: password,
+});
+   }
+   
+    return (
     <form className="space-y-4" onSubmit={sendForm}>
       {esRegistro && (
         <div className="space-y-1.5">
@@ -136,6 +128,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+
           />
           <button
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant focus:outline-none transition-colors"
@@ -166,8 +159,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
                       rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
                       focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              id="password"
-              name="password"
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
@@ -205,22 +198,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </div>
       )}
       <div className="pt-2">
-        {error && (
-          <p role="alert" className="text-error text-sm">
-            {error}
-          </p>
-        )}
+        {error && (<p role="alert" className="text-error text-sm"> {error}</p>)}
+
         <button
           className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          title="La autenticación se integrará después"
+          /*disabled
+          title="La autenticación se integrará después"*/
         >
           <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
           <span className="material-symbols-outlined">
             {esRegistro ? "person_add" : "arrow_forward"}
           </span>
         </button>
-      </div>
-    </form>
-  );
+      </div> </form>
+    );
 }

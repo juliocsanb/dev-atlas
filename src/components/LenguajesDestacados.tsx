@@ -164,6 +164,5 @@ export default function LenguajesDestacados() {
           ))}
         </div>
       </div>
-    </section>
-  );
+    </section> );
 }

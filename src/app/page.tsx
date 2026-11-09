@@ -31,20 +31,17 @@ export default function Home() {
             <nav className="hidden md:flex items-center gap-space-lg">
               <a
                 className="text-primary dark:text-primary font-medium border-b-2 border-primary dark:border-primary pb-1 text-label-ui font-label-ui transition-colors"
-                href="#"
-              >
+                href="#">
                 Inicio
               </a>
               <a
                 className="text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors text-label-ui font-label-ui"
-                href="#lenguajes"
-              >
+                href="#lenguajes">
                 Lenguajes
               </a>
               <a
                 className="text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors text-label-ui font-label-ui"
-                href="#categorias"
-              >
+                href="#categorias">
                 Categorías
               </a>
               <a
@@ -88,7 +85,7 @@ export default function Home() {
             {/* Trailing Primary Action (Login button) */}
             <a
               className="bg-surface-container border border-outline-variant/50 hover:border-primary/50 text-on-surface hover:text-primary px-3.5 py-1.5 rounded-lg text-label-ui font-label-ui transition-all duration-150 ease-out active:scale-[0.98] flex items-center gap-1.5"
-              href="/login"
+              href="/login"//a donde nos manda el login
             >
               <span className="material-symbols-outlined text-[16px]">
                 login
@@ -106,6 +103,7 @@ export default function Home() {
         <Categorias />
         <ComparacionLenguaje />
         <FilosofiaEditorial />
+
         {/* SECTION: CTA Final */}
         <section className="py-20 md:py-28 relative overflow-hidden">
           {/* Ambient Glow Spot */}

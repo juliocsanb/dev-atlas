@@ -100,7 +100,6 @@ export default function FilosofiaEditorial() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </div> </section>
   );
 }
