@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getLoginErrorMessage } from "@/lib/authErrors";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
   const esRegistro = mode === "signup";
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
@@ -23,40 +31,54 @@ export default function AuthForm({ mode }: AuthFormProps) {
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
+
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      setError("Ingresa tu correo y tu contraseña.");
+      return;
+    }
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
+    setLoading(true);
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
           firebaseAuth,
-          email.trim(),
+          cleanEmail,
           password,
         );
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, cleanEmail, password);
+        router.push("/dashboard");
+        // No quitamos el estado de carga: la página va a cambiar.
+        return;
       }
     } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
+      console.error("Error de Firebase Auth:", error);
       setError(
         esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo."
+          : getLoginErrorMessage(error),
       );
     }
-
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
+    setLoading(false);
   }
+
+  const buttonText = esRegistro
+    ? loading
+      ? "Creando cuenta..."
+      : "Crear cuenta"
+    : loading
+      ? "Iniciando sesión..."
+      : "Acceder a DevAtlas";
 
   return (
     <form className="space-y-4" onSubmit={sendForm}>
@@ -211,13 +233,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </p>
         )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
           type="submit"
-          title="La autenticación se integrará después"
+          disabled={loading}
         >
-          <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
-          <span className="material-symbols-outlined">
-            {esRegistro ? "person_add" : "arrow_forward"}
+          <span>{buttonText}</span>
+          <span
+            className={`material-symbols-outlined ${loading ? "animate-spin" : ""}`}
+          >
+            {loading
+              ? "progress_activity"
+              : esRegistro
+                ? "person_add"
+                : "arrow_forward"}
           </span>
         </button>
       </div>
