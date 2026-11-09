@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const esRegistro = mode === "signup";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,8 +29,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
+
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
@@ -40,22 +47,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
       }
+      router.push("/dashboard");
+      
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
       setError(
         esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo."
+          : "No se pudo iniciar sesión. Revisa tus credenciales.",
       );
     }
-
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
   }
 
   return (
@@ -66,10 +70,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             Nombre completo
           </label>
           <div className="relative">
-            <span
-              className="material-symbols-outlined absolute 
-                left-3 top-1/2 -translate-y-1/2 text-outline"
-            >
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">
               person
             </span>
             <input
@@ -108,10 +109,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       </div>
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label
-            className="block font-label-ui text-label-ui text-on-surface-variant font-medium"
-            htmlFor="password"
-          >
+          <label className={labelClass} htmlFor="password">
             Contraseña
           </label>
           <Link
@@ -126,9 +124,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <span className="material-symbols-outlined">lock</span>
           </div>
           <input
-            className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            className={inputClass}
             id="password"
             name="password"
             placeholder="••••••••••••"
@@ -151,10 +147,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       {esRegistro && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label
-              className="block font-label-ui text-label-ui text-on-surface-variant font-medium"
-              htmlFor="password"
-            >
+            <label className={labelClass} htmlFor="confirmPassword">
               Confirmar contraseña
             </label>
           </div>
@@ -163,11 +156,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <span className="material-symbols-outlined">lock</span>
             </div>
             <input
-              className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              id="password"
-              name="password"
+              className={inputClass}
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
@@ -201,19 +192,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
               Mantener sesión activa
             </span>
           </label>
-          <span className="font-label-code text-label-code text-outline hidden sm:inline-block"></span>
         </div>
       )}
       <div className="pt-2">
         {error && (
-          <p role="alert" className="text-error text-sm">
+          <p role="alert" className="text-error text-sm mb-2 text-center">
             {error}
           </p>
         )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container hover:bg-primary-fixed cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          title="La autenticación se integrará después"
         >
           <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
           <span className="material-symbols-outlined">
