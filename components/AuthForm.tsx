@@ -1,13 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const esRegistro = mode === "signup";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -16,6 +22,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
@@ -23,13 +31,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
+    setSuccess("");
+
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
@@ -40,26 +51,46 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+        setSuccess("Tu cuenta se creó correctamente.");
+      } else {
+        await signInWithEmailAndPassword(
+          firebaseAuth,
+          email.trim(),
+          password,
+        );
+        setSuccess("Sesión iniciada. Redirigiendo...");
+        window.setTimeout(() => router.replace("/"), 700);
       }
     } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
-      setError(
-        esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
-      );
-    }
+      const errorCode =
+        typeof error === "object" && error !== null && "code" in error
+          ? error.code
+          : undefined;
 
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
+      if (!esRegistro && errorCode === "auth/invalid-credential") {
+        setError("El correo o la contraseña son incorrectos.");
+      } else if (errorCode === "auth/email-already-in-use") {
+        setError("Ya existe una cuenta con ese correo.");
+      } else if (errorCode === "auth/weak-password") {
+        setError("La contraseña debe tener al menos 6 caracteres.");
+      } else {
+        setError(
+          esRegistro
+            ? "No se pudo crear la cuenta. Revisa los datos e inténtalo de nuevo."
+            : "No se pudo iniciar sesión. Revisa tus credenciales e inténtalo de nuevo.",
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
-    <form className="space-y-4" onSubmit={sendForm}>
+    <form
+      className="space-y-4"
+      onSubmit={sendForm}
+      aria-busy={isSubmitting}
+    >
       {esRegistro && (
         <div className="space-y-1.5">
           <label htmlFor="nombre" className={labelClass}>
@@ -101,6 +132,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             placeholder="alex.dev@empresa.io"
             required
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -134,6 +166,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             placeholder="••••••••••••"
             required
             type={showPassword ? "text" : "password"}
+            autoComplete={esRegistro ? "new-password" : "current-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -206,19 +239,44 @@ export default function AuthForm({ mode }: AuthFormProps) {
       )}
       <div className="pt-2">
         {error && (
-          <p role="alert" className="text-error text-sm">
+          <p role="alert" className="mb-3 text-error text-sm" aria-live="polite">
             {error}
           </p>
         )}
+        {success && (
+          <p
+            role="status"
+            className="mb-3 flex items-center gap-2 text-tertiary text-sm"
+            aria-live="polite"
+          >
+            <span className="material-symbols-outlined animate-pulse">
+              check_circle
+            </span>
+            {success}
+          </p>
+        )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10 hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
           type="submit"
-          title="La autenticación se integrará después"
+          disabled={isSubmitting}
         >
-          <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
-          <span className="material-symbols-outlined">
-            {esRegistro ? "person_add" : "arrow_forward"}
-          </span>
+          {isSubmitting ? (
+            <>
+              <span className="material-symbols-outlined animate-spin">
+                progress_activity
+              </span>
+              <span>
+                {esRegistro ? "Creando cuenta..." : "Validando credenciales..."}
+              </span>
+            </>
+          ) : (
+            <>
+              <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
+              <span className="material-symbols-outlined">
+                {esRegistro ? "person_add" : "arrow_forward"}
+              </span>
+            </>
+          )}
         </button>
       </div>
     </form>

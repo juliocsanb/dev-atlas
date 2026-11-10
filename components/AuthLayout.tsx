@@ -1,5 +1,17 @@
-import Link from "next/link";
-import { ReactNode } from "react";
+import { AnchorHTMLAttributes, ReactNode } from "react";
+
+type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+  children: ReactNode;
+};
+
+function Link({ href, children, ...props }: LinkProps) {
+  return (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  );
+}
 
 type AuthLayoutProps = {
   title: string;
@@ -97,7 +109,7 @@ export default function AuthLayout({
                 shield
               </span>
               <span className="font-label-code text-label-code text-outline tracking-tight text-center">
-                Autenticación en desarrollo · Próximamente disponible
+                Protegido con Firebase Authentication
               </span>
             </div>
           </div>
