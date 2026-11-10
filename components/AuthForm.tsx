@@ -16,6 +16,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [mensaje, setMensaje] = useState("");
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
@@ -24,6 +25,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
     setError("");
+    setMensaje("");
     event.preventDefault();
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
@@ -36,11 +38,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
           firebaseAuth,
           email.trim(),
           password,
+
         );
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
       }
+      setMensaje(
+        esRegistro ? "¡Cuenta creada con éxito!" : "¡Inicio de sesión exitoso!",
+      );
+
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
       setError(
@@ -208,8 +215,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
         {error && (
           <p role="alert" className="text-error text-sm">
             {error}
+
           </p>
+          
         )}
+        {mensaje && <p className="text-green-600 text-sm">{mensaje}</p>}
         <button
           className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
