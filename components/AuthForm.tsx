@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
   const esRegistro = mode === "signup";
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
@@ -40,12 +46,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+        router.push("/dashboard?bienvenida=cuenta");
+        return;
+      } else {
+        await signInWithEmailAndPassword(
+          firebaseAuth,
+          email.trim(),
+          password,
+        );
+        router.push("/dashboard?bienvenida=sesion");
+        return;
       }
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
       setError(
         esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo."
           : "No se pudo iniciar sesion. Revisa tus credenciales.",
       );
     }
