@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
@@ -40,6 +41,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        window.location.href = "/bienvenida";
       }
     } catch (error) {
       console.log("Error de Firebase Auth: ", error);
