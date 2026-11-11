@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const esRegistro = mode === "signup";
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
@@ -16,6 +23,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [toast, setToast] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
@@ -23,39 +32,70 @@ export default function AuthForm({ mode }: AuthFormProps) {
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
+    setToast("");
+
     if (esRegistro && password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
+
+    setLoading(true);
 
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
           firebaseAuth,
           email.trim(),
-          password,
+          password
         );
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+        setToast("¡Cuenta creada con éxito! Redirigiendo a DevAtlas...");
+      } else {
+        await signInWithEmailAndPassword(
+          firebaseAuth,
+          email.trim(),
+          password
+        );
+        setToast("¡Inicio de sesión exitoso! Redirigiendo a DevAtlas...");
       }
-    } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
-      setError(
-        esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
-      );
-    }
 
-    console.log({
-      modo: mode,
-      name: esRegistro ? name : undefined,
-      email: email,
-      password: password,
-    });
+      console.log({
+        modo: mode,
+        name: esRegistro ? name : undefined,
+        email: email,
+      });
+
+      // 2.5 segundos de espera para capturar la evidencia cómodamente
+      setTimeout(() => {
+        router.push("/");
+      }, 2500);
+
+    } catch (err: any) {
+      console.error("Error de Firebase Auth:", err);
+      setLoading(false);
+
+      if (err.code === "auth/email-already-in-use") {
+        setError("Este correo ya está registrado. Intenta iniciar sesión.");
+      } else if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-credential" ||
+        err.code === "auth/user-not-found"
+      ) {
+        setError("Correo o contraseña incorrectos.");
+      } else if (err.code === "auth/weak-password") {
+        setError("La contraseña debe tener al menos 6 caracteres.");
+      } else {
+        setError(
+          esRegistro
+            ? "No se pudo crear la cuenta. Revisa tus datos."
+            : "No se pudo iniciar sesión. Revisa tus credenciales."
+        );
+      }
+    }
   }
 
   return (
@@ -86,6 +126,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
         </div>
       )}
+
       <div className="space-y-1.5">
         <label className={labelClass} htmlFor="email">
           Correo Electrónico
@@ -106,6 +147,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           />
         </div>
       </div>
+
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label
@@ -148,12 +190,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </button>
         </div>
       </div>
+
       {esRegistro && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label
               className="block font-label-ui text-label-ui text-on-surface-variant font-medium"
-              htmlFor="password"
+              htmlFor="confirmPassword"
             >
               Confirmar contraseña
             </label>
@@ -166,8 +209,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
                       rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
                       focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              id="password"
-              name="password"
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
@@ -188,6 +231,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
         </div>
       )}
+
       {!esRegistro && (
         <div className="flex items-center justify-between pt-1">
           <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -201,21 +245,48 @@ export default function AuthForm({ mode }: AuthFormProps) {
               Mantener sesión activa
             </span>
           </label>
-          <span className="font-label-code text-label-code text-outline hidden sm:inline-block"></span>
         </div>
       )}
-      <div className="pt-2">
-        {error && (
-          <p role="alert" className="text-error text-sm">
-            {error}
-          </p>
+
+      <div className="pt-2 space-y-3">
+        {/* Toast de éxito con diseño destacado */}
+        {toast && (
+          <div
+            role="status"
+            className="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-label-ui text-label-ui font-medium shadow-sm animate-fade-in"
+          >
+            <span className="material-symbols-outlined text-[20px] text-emerald-400 shrink-0">
+              check_circle
+            </span>
+            <span>{toast}</span>
+          </div>
         )}
+
+        {/* Mensaje de error visual */}
+        {error && (
+          <div
+            role="alert"
+            className="flex items-center gap-2.5 p-3 rounded-lg bg-red-500/15 border border-red-500/40 text-red-400 font-label-ui text-label-ui font-medium shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[20px] text-red-400 shrink-0">
+              error
+            </span>
+            <span>{error}</span>
+          </div>
+        )}
+
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10 disabled:opacity-50 cursor-pointer"
           type="submit"
-          title="La autenticación se integrará después"
+          disabled={loading}
         >
-          <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
+          <span>
+            {loading
+              ? "Procesando..."
+              : esRegistro
+              ? "Crear cuenta"
+              : "Acceder a DevAtlas"}
+          </span>
           <span className="material-symbols-outlined">
             {esRegistro ? "person_add" : "arrow_forward"}
           </span>
