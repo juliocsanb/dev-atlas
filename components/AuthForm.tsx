@@ -1,13 +1,18 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { firebaseAuth } from "@/lib/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 type AuthFormProps = { mode: "login" | "signup" };
 
 export default function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const esRegistro = mode === "signup";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -17,19 +22,28 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const labelClass =
     "block font-label-ui text-label-ui text-on-surface-variant font-medium";
   const inputClass =
     "w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
 
   async function sendForm(event: React.FormEvent<HTMLFormElement>) {
-    setError("");
     event.preventDefault();
+    setError("");
+    setSuccess("");
+
     if (esRegistro && password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+      setError("Las contraseñas no coinciden");
+      console.log("error");
       return;
     }
-
     try {
       if (esRegistro) {
         const resultado = await createUserWithEmailAndPassword(
@@ -40,13 +54,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await updateProfile(resultado.user, {
           displayName: name.trim(),
         });
+        setSuccess("Cuenta creada exitosamente");
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        setSuccess("Sesión iniciada exitosamente");
       }
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1000);
+
+      setError("");
     } catch (error) {
-      console.log("Error de Firebase Auth: ", error);
+      console.log("Error firebase auth", error);
       setError(
         esRegistro
-          ? "No se pudo crear la cujenta. Revisa los datos o el correo."
-          : "No se pudo iniciar sesion. Revisa tus credenciales.",
+          ? "No se pudo crear la cuenta. Revisa los datos o el correo electrónico."
+          : "No se pudo iniciar sesión. Revisa tus credenciales.",
       );
     }
 
@@ -66,10 +90,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             Nombre completo
           </label>
           <div className="relative">
-            <span
-              className="material-symbols-outlined absolute 
-                left-3 top-1/2 -translate-y-1/2 text-outline"
-            >
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">
               person
             </span>
             <input
@@ -126,9 +147,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <span className="material-symbols-outlined">lock</span>
           </div>
           <input
-            className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+            className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             id="password"
             name="password"
             placeholder="••••••••••••"
@@ -153,7 +172,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <div className="flex items-center justify-between">
             <label
               className="block font-label-ui text-label-ui text-on-surface-variant font-medium"
-              htmlFor="password"
+              htmlFor="confirmPassword"
             >
               Confirmar contraseña
             </label>
@@ -163,11 +182,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <span className="material-symbols-outlined">lock</span>
             </div>
             <input
-              className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 
-                      rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none 
-                      focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              id="password"
-              name="password"
+              className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline font-code-inline text-code-inline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="••••••••••••"
               required
               type={showConfirmPassword ? "text" : "password"}
@@ -204,16 +221,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <span className="font-label-code text-label-code text-outline hidden sm:inline-block"></span>
         </div>
       )}
-      <div className="pt-2">
-        {error && (
-          <p role="alert" className="text-error text-sm">
-            {error}
-          </p>
+      <div className="pt-2 space-y-2">
+        {error && <p className="text-error text-sm font-medium">{error}</p>}
+        {success && (
+          <p className="text-success text-sm font-medium">{success}</p>
         )}
         <button
-          className="w-full flex items-center justify-center gap-2 bg-primary-container opacity-70 cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
+          className="w-full flex items-center justify-center gap-2 bg-primary-container cursor-pointer text-on-primary font-label-ui text-label-ui font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-[0.98] border border-white/10"
           type="submit"
-          title="La autenticación se integrará después"
         >
           <span>{esRegistro ? "Crear cuenta" : "Acceder a DevAtlas"}</span>
           <span className="material-symbols-outlined">

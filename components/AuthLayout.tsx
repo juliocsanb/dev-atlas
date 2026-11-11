@@ -82,12 +82,12 @@ export default function AuthLayout({
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
                   {mode === "login"
                     ? "¿No tienes una cuenta aún?"
-                    : "¿Ya tienes cuenta?"}
+                    : "¿Ya tienes una cuenta?"}
                   <Link
                     className="font-semibold text-primary hover:text-primary-fixed underline-offset-4 hover:underline transition-colors ml-1"
                     href={mode === "login" ? "/signup" : "/login"}
                   >
-                    {mode === "login" ? "Registrarse" : "Iniciar sesión"}
+                    {mode === "login" ? "Regístrate" : "Inicia sesión"}
                   </Link>
                 </p>
               </div>
